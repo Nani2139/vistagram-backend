@@ -8,6 +8,9 @@ require("dotenv").config({ path: "./config.env" });
 
 const app = express();
 
+// Trust proxy for Railway deployment
+app.set("trust proxy", 1);
+
 // Security middleware
 app.use(helmet());
 app.use(
