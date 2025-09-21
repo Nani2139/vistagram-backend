@@ -71,20 +71,24 @@ const processImage = async (req, res, next) => {
 
   try {
     const filename = `${uuidv4()}.jpg`;
-    const filepath = path.join(__dirname, "../uploads", filename);
 
-    // Process image with Sharp
-    await sharp(req.file.buffer)
+    // Process image with Sharp and convert to base64 for storage
+    const processedBuffer = await sharp(req.file.buffer)
       .resize(1080, 1080, {
         fit: "inside",
         withoutEnlargement: true,
       })
       .jpeg({ quality: 85 })
-      .toFile(filepath);
+      .toBuffer();
+
+    // Convert to base64 for storage in database
+    const base64Image = `data:image/jpeg;base64,${processedBuffer.toString(
+      "base64"
+    )}`;
 
     // Update file info
     req.file.filename = filename;
-    req.file.path = `/uploads/${filename}`;
+    req.file.path = base64Image; // Store base64 instead of file path
     req.file.processed = true;
 
     next();
