@@ -34,6 +34,13 @@ app.use(limiter);
 app.use(express.json({ limit: "50mb" }));
 app.use(express.urlencoded({ extended: true, limit: "50mb" }));
 
+// Request timeout middleware
+app.use((req, res, next) => {
+  req.setTimeout(30000); // 30 seconds
+  res.setTimeout(30000); // 30 seconds
+  next();
+});
+
 // Static files - removed since we're using base64 storage now
 // app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
@@ -81,3 +88,7 @@ const server = app.listen(PORT, () => {
 
 // Set server timeout to 30 seconds for image uploads
 server.timeout = 30000;
+
+// Railway-specific timeout handling
+server.keepAliveTimeout = 30000;
+server.headersTimeout = 35000;
