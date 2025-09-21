@@ -31,7 +31,8 @@ const upload = multer({
   storage,
   fileFilter,
   limits: {
-    fileSize: parseInt(process.env.MAX_FILE_SIZE) || 10 * 1024 * 1024, // 10MB default
+    fileSize: parseInt(process.env.MAX_FILE_SIZE) || 50 * 1024 * 1024, // 50MB default
+    fieldSize: 50 * 1024 * 1024, // 50MB for field size
   },
 });
 
@@ -70,6 +71,7 @@ const processImage = async (req, res, next) => {
   }
 
   try {
+    console.log("Processing image - Size:", req.file.buffer.length, "bytes");
     const filename = `${uuidv4()}.jpg`;
 
     // Process image with Sharp and convert to base64 for storage
@@ -81,10 +83,14 @@ const processImage = async (req, res, next) => {
       .jpeg({ quality: 85 })
       .toBuffer();
 
+    console.log("Image processed - New size:", processedBuffer.length, "bytes");
+
     // Convert to base64 for storage in database
     const base64Image = `data:image/jpeg;base64,${processedBuffer.toString(
       "base64"
     )}`;
+
+    console.log("Base64 conversion complete - Length:", base64Image.length);
 
     // Update file info
     req.file.filename = filename;
@@ -94,7 +100,11 @@ const processImage = async (req, res, next) => {
     next();
   } catch (error) {
     console.error("Image processing error:", error);
-    res.status(500).json({ message: "Error processing image" });
+    res.status(500).json({
+      success: false,
+      message: "Error processing image",
+      error: process.env.NODE_ENV === "development" ? error.message : undefined,
+    });
   }
 };
 
