@@ -13,7 +13,9 @@ app.use(helmet());
 app.use(
   cors({
     origin:
-      process.env.NODE_ENV === "production" ? false : ["http://localhost:3000"],
+      process.env.NODE_ENV === "production"
+        ? ["https://vistagram-frontend.netlify.app"]
+        : ["http://localhost:3000"],
     credentials: true,
   })
 );
