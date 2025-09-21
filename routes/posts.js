@@ -165,15 +165,21 @@ router.post(
   handleUploadError,
   async (req, res) => {
     try {
+      console.log("Creating post - User:", req.user._id);
+      console.log("Request body:", req.body);
+      console.log("File info:", req.file ? "File received" : "No file");
+
       const { caption, location } = req.body;
 
       if (!req.file) {
+        console.log("No file provided");
         return res.status(400).json({
           success: false,
           message: "Image is required",
         });
       }
 
+      console.log("Processing image...");
       const postData = {
         user: req.user._id,
         image: req.file.path,
@@ -181,17 +187,21 @@ router.post(
         location: location ? JSON.parse(location) : null,
       };
 
+      console.log("Saving post to database...");
       const post = new Post(postData);
       await post.save();
 
+      console.log("Populating user data...");
       // Populate user data
       await post.populate("user", "username profilePicture");
 
+      console.log("Adding to user's posts array...");
       // Add to user's posts array
       await User.findByIdAndUpdate(req.user._id, {
         $push: { posts: post._id },
       });
 
+      console.log("Post created successfully:", post._id);
       res.status(201).json({
         success: true,
         data: post,
@@ -202,6 +212,8 @@ router.post(
       res.status(500).json({
         success: false,
         message: "Error creating post",
+        error:
+          process.env.NODE_ENV === "development" ? error.message : undefined,
       });
     }
   }
