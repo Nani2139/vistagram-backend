@@ -34,8 +34,8 @@ app.use(limiter);
 app.use(express.json({ limit: "10mb" }));
 app.use(express.urlencoded({ extended: true, limit: "10mb" }));
 
-// Static files
-app.use("/uploads", express.static(path.join(__dirname, "uploads")));
+// Static files - removed since we're using base64 storage now
+// app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
 // Database connection
 mongoose
