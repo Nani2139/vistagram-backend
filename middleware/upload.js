@@ -31,8 +31,8 @@ const upload = multer({
   storage,
   fileFilter,
   limits: {
-    fileSize: 50 * 1024 * 1024, // 50MB - hardcoded to avoid env issues
-    fieldSize: 50 * 1024 * 1024, // 50MB for field size
+    fileSize: 10 * 1024 * 1024, // 10MB - reduced for faster processing
+    fieldSize: 10 * 1024 * 1024, // 10MB for field size
   },
 });
 
@@ -42,7 +42,7 @@ const handleUploadError = (error, req, res, next) => {
     if (error.code === "LIMIT_FILE_SIZE") {
       return res.status(400).json({
         success: false,
-        message: `File too large. Maximum size allowed is 50MB`,
+        message: `File too large. Maximum size allowed is 10MB`,
       });
     }
     if (error.code === "LIMIT_FILE_COUNT") {
@@ -61,7 +61,7 @@ const handleUploadError = (error, req, res, next) => {
   next(error);
 };
 
-// Image processing middleware
+// Image processing middleware - Optimized for speed
 const processImage = async (req, res, next) => {
   if (!req.file) {
     return next();
@@ -71,13 +71,14 @@ const processImage = async (req, res, next) => {
     console.log("Processing image - Size:", req.file.buffer.length, "bytes");
     const filename = `${uuidv4()}.jpg`;
 
-    // Process image with Sharp and convert to base64 for storage
+    // Optimize image processing for speed
     const processedBuffer = await sharp(req.file.buffer)
-      .resize(1080, 1080, {
+      .resize(800, 800, {
+        // Smaller size for faster processing
         fit: "inside",
         withoutEnlargement: true,
       })
-      .jpeg({ quality: 85 })
+      .jpeg({ quality: 70 }) // Lower quality for faster processing
       .toBuffer();
 
     console.log("Image processed - New size:", processedBuffer.length, "bytes");
